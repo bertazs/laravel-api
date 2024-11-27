@@ -1,0 +1,43 @@
+version: '3.8'
+
+services:
+    app:
+        build:
+            context: .
+            dockerfile: Dockerfile
+        container_name: laravel-app
+        restart: unless-stopped
+        working_dir: /var/www
+        volumes:
+            - .:/var/www
+            - ./storage/logs:/var/www/storage/logs
+            - ./vendor:/var/www/vendor
+        ports:
+            - "9000:9000" # PHP-FPM port
+
+    mysql:
+        image: mysql:8.0
+        container_name: laravel-mysql
+        restart: unless-stopped
+        environment:
+            MYSQL_ROOT_PASSWORD: root
+            MYSQL_DATABASE: laravel_db
+            MYSQL_USER: laravel_user
+            MYSQL_PASSWORD: password123
+        volumes:
+            - db_data:/var/lib/mysql
+        ports:
+            - "3306:3306"
+
+    nginx:
+        image: nginx:latest
+        container_name: laravel-nginx
+        restart: unless-stopped
+        ports:
+            - "8080:80"
+        volumes:
+            - .:/var/www
+            - ./nginx.conf:/etc/nginx/conf.d/default.conf
+
+volumes:
+    db_data:
